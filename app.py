@@ -143,20 +143,18 @@ def predict():
     features['Amount'] = amount
 
     input_df = pd.DataFrame([features])
+    input_df = input_df[['Time'] + [f'V{i}' for i in range(1, 29)] + ['Amount']] 
 
     # FIX: use transform() not fit_transform()
-    input_df['Amount'] = scaler.transform(
-        input_df[['Amount']])
-    input_df['Time']   = scaler.transform(
-        input_df[['Time']])
-
+    input_df['Amount'] = scaler.transform(input_df[['Amount']].values)
+    input_df['Time'] = scaler.transform(input_df[['Time']].values)
     pred  = model.predict(input_df)[0]
     probs = model.predict_proba(input_df)[0]
 
     return jsonify({
         'prediction'  : int(pred),
-        'fraud_prob'  : round(probs[1] * 100, 2),
-        'genuine_prob': round(probs[0] * 100, 2)
+        'fraud_prob'  : round(float(probs[1]) * 100, 2),
+        'genuine_prob': round(float(probs[0]) * 100, 2)
     })
 
 if __name__ == '__main__':
